@@ -43,13 +43,17 @@ function App() {
       .then(response => {
         const { data } = response;
         setGameListVisible(false);
-        setGame( {message: "", isOver: false, started: false});
+        setGame( {message: "", isOver: false, started: true});
         setBoard( {boardSize: data.boardSize, boardName: data.boardName, usersCells: data.usersCells, computersCells: data.computersCells } )
         
       })
       .catch(error => {
         console.log(error);
       })
+  }
+
+  const handleBack = () => {
+    setGameListVisible(false);
   }
 
   const makeTurn = (row, col) => {
@@ -93,7 +97,7 @@ function App() {
   const checkForWinner = (usersCell, computersCell) => {
     const boardData = translateBoard(board);
     boardData[usersCell.row][usersCell.col] = USER_SYMBOL;
-    if (!Object.keys(computersCell).length === 0) {
+    if (Object.keys(computersCell).length > 0) {
       boardData[computersCell.row][computersCell.col] = COMPUTER_SYMBOL;
     }
     
@@ -118,8 +122,8 @@ function App() {
 
   const renderGame = () => {
     return (
-      <Segment>
-        <Segment.Group >
+      <Segment style={{display: "flex", justifyContent: "center", alignItems: "center", height: '100vh'}}>
+        <Segment.Group>
           <Segment>
             {game.isOver ? <div>{game.message}</div> : <div>{board.boardName}</div>}
           </Segment>
@@ -138,7 +142,7 @@ function App() {
   }
   
   const renderGameList = () => {
-    return <GameList handleLoadGame={(id) => handleLoadGame(id)} />
+    return <GameList handleLoadGame={(id) => handleLoadGame(id)} handleBack={handleBack} />
   }
 
   
