@@ -4,8 +4,10 @@ import { Segment, Button } from 'semantic-ui-react';
 
 import Board from './components/Board'
 import SaveModal from './components/SaveModal';
+import GameList from './components/GameList'
 import { USER_SYMBOL, COMPUTER_SYMBOL } from './const';
 import { translateBoard } from './utils'
+import tictactoe from './api/tictactoe';
 
 function App() {
 
@@ -17,8 +19,8 @@ function App() {
   }
 
   const [board, setBoard] = useState(initialBoard)
-
   const [game, setGame] = useState({ message: "", isOver: false, started: false });
+  const [gameListVisible, setGameListVisible] = useState(false);
 
   const handleClick = (row, col) => {
     if (!game.started) {
@@ -30,6 +32,24 @@ function App() {
   const handleReset = () => {
     setGame({ message: "", isOver: false, started: false});
     setBoard(initialBoard);
+  }
+
+  const handleListGames = () => {
+    setGameListVisible(true);
+  }
+
+  const handleLoadGame = (id) => {
+    tictactoe.get(`/boards/${id}`)
+      .then(response => {
+        const { data } = response;
+        setGameListVisible(false);
+        setGame( {message: "", isOver: false, started: false});
+        setBoard( {boardSize: data.boardSize, boardName: data.boardName, usersCells: data.usersCells, computersCells: data.computersCells } )
+        
+      })
+      .catch(error => {
+        console.log(error);
+      })
   }
 
   const makeTurn = (row, col) => {
@@ -96,20 +116,37 @@ function App() {
     }
   }
 
-  return (
-    <Segment.Group style={{width: "80%", margin: "auto"}}>
+  const renderGame = () => {
+    return (
       <Segment>
-        {game.isOver ? <div>{game.message}</div> : <div></div>}
+        <Segment.Group >
+          <Segment>
+            {game.isOver ? <div>{game.message}</div> : <div>{board.boardName}</div>}
+          </Segment>
+          <Segment>
+            <Board playable onClick={(i, j) => handleClick(i, j)} board={board}/>
+          </Segment>
+          <Segment>
+            <SaveModal disabled={!game.started} board={board} game={game} />
+            <Button disabled={!game.started} onClick={handleReset}>Reset</Button>
+            <Button onClick={handleListGames}>List Games</Button>
+          </Segment>
+      </Segment.Group>
       </Segment>
-      <Segment>
-        <Board onClick={(i, j) => handleClick(i, j)} board={board}/>
-      </Segment>
-      <Segment>
-        <SaveModal disabled={!game.started} board={board} game={game} />
-        <Button disabled={!game.started} onClick={handleReset}>Reset</Button>
-      </Segment>
-    </Segment.Group>
-  );
+      
+    )
+  }
+  
+  const renderGameList = () => {
+    return <GameList handleLoadGame={(id) => handleLoadGame(id)} />
+  }
+
+  
+  if (gameListVisible) {
+    return renderGameList()
+  } else {
+    return renderGame()
+  }
 }
 
 export default App;

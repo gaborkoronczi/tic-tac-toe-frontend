@@ -3,7 +3,7 @@
     height: 3rem;
     width: 3rem;
     display: inline-block;
-    cursor: pointer;
+    cursor: default;
     vertical-align: middle;
     text-align: center;
 }
