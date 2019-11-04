@@ -1,9 +1,0 @@
-.tile {
-    border: 1px solid black;
-    height: 3rem;
-    width: 3rem;
-    display: inline-block;
-    cursor: default;
-    vertical-align: middle;
-    text-align: center;
-}

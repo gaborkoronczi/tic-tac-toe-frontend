@@ -1,0 +1,10 @@
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    font-size: 3rem;
+    width: 10rem;
+    height: 10rem;
+    margin: 0 auto;
+    line-height: 1.4285rem;
+}

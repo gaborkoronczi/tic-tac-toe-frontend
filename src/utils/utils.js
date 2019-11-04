@@ -17,3 +17,10 @@ export const translateBoard = (board) => {
     })
     return translatedBoard;
 }
+
+export const initialBoard = {
+    boardSize: 3,
+    boardName: "",
+    usersCells: [],
+    computersCells: []
+}
