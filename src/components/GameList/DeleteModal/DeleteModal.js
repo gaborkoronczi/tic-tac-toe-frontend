@@ -15,13 +15,13 @@ function DeleteModal(props) {
        setModalOpen(false)
     }
 
-    const handleDeleteGame = ({id, boardName}) => {
+    const handleDeleteGame = () => {
+        const { id, boardName} = props.item;
         tictactoe.delete(`/boards/${id}`)
             .then(({ status }) => {
                 if (status === 200) {
                     props.setMessage({ hidden: false, type: 'positive', text: `${boardName} deleted succesfully!`});
                     setListOfGames(listOfGames.filter(item => item.id !== id));
-                    handleClose();
                 }
             })
             .catch(({response}) => {
@@ -30,7 +30,6 @@ function DeleteModal(props) {
                     text = `${response.status} ${response.data}`;
                 }
                 props.setMessage({ hidden: false, type: 'negative', text});
-                handleClose();
             })
     }
 

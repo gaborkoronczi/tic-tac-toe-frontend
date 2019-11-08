@@ -63,16 +63,22 @@ function Board (props) {
             for (let i = 0; i < workingBoard.boardSize && !computerCellFound; i++) {
                 for (let j = 0; j < workingBoard.boardSize && !computerCellFound; j++) {
                     if (!boardData[i][j] ) {
-                    computersCell = { row: i, col: j };
-                    computerCellFound = true;
+                        computersCell = { row: i, col: j };
+                        computerCellFound = true;
                     }
                 }
             }
             if (computerCellFound) {
-                setBoard({...workingBoard, usersCells: workingBoard.usersCells.concat(usersCell), computersCells: workingBoard.computersCells.concat(computersCell)});
+                setBoard({
+                    ...workingBoard,
+                    usersCells: workingBoard.usersCells.concat(usersCell),
+                    computersCells: workingBoard.computersCells.concat(computersCell)
+                });
             } else {
-                setBoard({...workingBoard, usersCells: workingBoard.usersCells.concat(usersCell)});
-                setGame({...game, message: "Draw", isOver: true});
+                setBoard({...workingBoard,
+                    usersCells: workingBoard.usersCells.concat(usersCell)
+                });
+                setGame({...game, message: "Draw!", isOver: true});
             }
             checkForWinner(usersCell, computersCell);
         }
@@ -110,7 +116,11 @@ function Board (props) {
     
         for (let i = 0; i < winningCondition.length; i++) {
             const [a, b, c] = winningCondition[i];
-            if (boardData[a.r][a.c] && boardData[a.r][a.c] === boardData[b.r][b.c] && boardData[a.r][a.c] === boardData[c.r][c.c]) {
+            if (
+                boardData[a.r][a.c] &&
+                boardData[a.r][a.c] === boardData[b.r][b.c] &&
+                boardData[a.r][a.c] === boardData[c.r][c.c]
+            ) {
                 setGame({...game, message: `${boardData[a.r][a.c]} won the game!`, isOver: true});
             }
         }
@@ -126,6 +136,7 @@ function Board (props) {
                         playable={props.playable}
                         editable={!(props.editHandler === undefined)}
                         key={`${i}${j}`}
+                        testId={`${i}${j}`}
                         value={boardData[i][j]}
                         onClick={() => handleClick(i, j)}
                         handleEdit={() => handleEdit(i, j, boardData[i][j])}
@@ -158,7 +169,12 @@ function Board (props) {
                         {renderBoard()}
                     </Segment>
                     <Segment>
-                        <SaveModal disabled={!game.started || game.isOver} board={workingBoard} game={game} setMessage={setMessage} />
+                        <SaveModal
+                            disabled={!game.started || game.isOver}
+                            board={workingBoard}
+                            game={game}
+                            setMessage={setMessage}
+                        />
                         <Button disabled={!game.started} onClick={handleReset}>Reset</Button>
                     </Segment>
                 </Segment.Group>

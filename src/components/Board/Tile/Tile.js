@@ -2,13 +2,24 @@ import React from 'react';
 import './Tile.css'
 
 function Tile(props) {
-    if (props.playable) {
-        return <div className="tile" onClick={() => props.onClick()}>{props.value}</div>
-    } else if (props.editable) {
-        return <div className="tile" onClick={() => props.handleEdit()}>{props.value}</div>
-    } else {
-        return <div className="tile" >{props.value}</div>
-    }
+
+    return (
+        <div
+            className="tile"
+            data-testid={`tile-${props.testId}`}
+            onClick={ 
+                props.playable ?
+                    () => props.onClick()
+                    :
+                    props.editable ?
+                    () => props.handleEdit()
+                    :
+                    null 
+            }
+        >
+            {props.value}
+        </div>
+    );
 }
 
 export default Tile;
