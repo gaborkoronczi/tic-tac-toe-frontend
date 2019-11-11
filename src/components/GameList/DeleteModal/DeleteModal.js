@@ -34,7 +34,7 @@ function DeleteModal(props) {
     }
 
     return (
-        <Modal  open={modalOpen} onClose={handleClose} trigger={<Button basic onClick={handleOpen} color='red'>Delete</Button>} size='tiny'>
+        <Modal open={modalOpen} onClose={handleClose} trigger={<Button basic onClick={handleOpen} color='red'>Delete</Button>} size='tiny'>
             <Modal.Header>Delete Game</Modal.Header>
             <Modal.Content >
                 Are you sure you want to delete {props.item.boardName} ?

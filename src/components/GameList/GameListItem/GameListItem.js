@@ -6,7 +6,7 @@ import Board from '../../Board/Board';
 import EditModal from '../EditModal/EditModal';
 import DeleteModal from '../DeleteModal/DeleteModal';
 
-function GameListItem({ item, handleLoadGame, handleDeleteGame, setMessage}) {
+function GameListItem({ item, handleLoadGame, setMessage}) {
     
     return (
         <Card>
@@ -25,7 +25,6 @@ function GameListItem({ item, handleLoadGame, handleDeleteGame, setMessage}) {
                 </Button.Group>
             </Card.Content>
         </Card>
-       
     )
 }
 

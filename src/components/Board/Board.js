@@ -136,7 +136,12 @@ function Board (props) {
                         playable={props.playable}
                         editable={!(props.editHandler === undefined)}
                         key={`${i}${j}`}
-                        testId={`${i}${j}`}
+                        testId={
+                            workingBoard.id ?
+                            `${i}${j}-${workingBoard.id}`
+                            :
+                            `${i}${j}`
+                        }
                         value={boardData[i][j]}
                         onClick={() => handleClick(i, j)}
                         handleEdit={() => handleEdit(i, j, boardData[i][j])}

@@ -14,9 +14,9 @@ function SaveModal(props) {
         const errors = {};
         if (!values.name) {
             errors.name = 'Required';
-        } else if (values.name.length <= 3 || values.name.length > 50) {
+        } else if (values.name.length < 3 || values.name.length > 50) {
             errors.name = 'Must be between 3 and 50 characters';
-        } else if (values.name.search(" ") > 0) {
+        } else if (values.name.search(" ") >= 0) {
             errors.name = 'Must not contain any spaces';
         }
         return errors;
@@ -29,7 +29,6 @@ function SaveModal(props) {
        setMessage({...message, hidden: true});
        formik.handleReset();
     }
-    
 
     const handleSubmit = () => {
             const request = props.board;

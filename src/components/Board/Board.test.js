@@ -37,6 +37,7 @@ it("doesn't change non playable game on click", () => {
     tiles.forEach(item => {
         expect(item).toBeEmpty();
     });
+    expect(board).toEqual(initialBoard);
 });
 
 it('renders playable empty board with disabled buttons', () => {
@@ -73,10 +74,17 @@ it('renders user and computer symbol on click and enables save and reset', () =>
     expect(tiles.some(item => item.textContent === COMPUTER_SYMBOL)).toBeTruthy();
     expect(getByText('Save Game')).toBeEnabled();
     expect(getByText('Reset')).toBeEnabled();
+    expect(board.boardSize).toBe(3);
+    expect(board.usersCells).toHaveLength(1);
+    expect(board.usersCells[0]).toHaveProperty('col', 1);
+    expect(board.usersCells[0]).toHaveProperty('row', 0);
+    expect(board.computersCells).toHaveLength(1);
+    expect(board.usersCells[0]).toHaveProperty('col');
+    expect(board.usersCells[0]).toHaveProperty('row');
 });
 
 it("doesn't overwrite computer's tile on click", () => {
-    board = {
+    const testBoard = {
         boardSize: 3,
         boardName: "",
         usersCells: [
@@ -86,6 +94,7 @@ it("doesn't overwrite computer's tile on click", () => {
             { col: 0, row: 0 }
         ]
     };
+    board = {...testBoard};
     game = {
         message: "",
         isOver: false,
@@ -105,6 +114,7 @@ it("doesn't overwrite computer's tile on click", () => {
     );
 
     expect(getByTestId('tile-00')).toHaveTextContent(COMPUTER_SYMBOL);
+    expect(board).toEqual(testBoard);
 });
 
 it("shows proper message on user win and disables save", () => {
@@ -145,6 +155,28 @@ it("shows proper message on user win and disables save", () => {
     expect(queryByText('X won the game!')).not.toBeNull();
     expect(getByText('Save Game')).toBeDisabled();
     expect(getByText('Reset')).toBeEnabled();
+    expect(board).toEqual({
+            boardSize: 3,
+            boardName: "",
+            usersCells: [
+                { col: 0 , row: 0 },
+                { col: 1 , row: 1 },
+                { col: 2 , row: 1 },
+                { col: 0 , row: 2 },
+                { col: 2 , row: 2 }
+            ],
+            computersCells: [
+                { col: 1 , row: 0 },
+                { col: 2 , row: 0 },
+                { col: 0 , row: 1 },
+                { col: 1 , row: 2 }
+            ]
+    });
+    expect(game).toEqual({
+        message: "X won the game!",
+        isOver: true,
+        started: true
+    });
 });
 
 it("shows proper message on computer win and disables save", () => {
@@ -184,6 +216,28 @@ it("shows proper message on computer win and disables save", () => {
     expect(queryByText('O won the game!')).not.toBeNull();
     expect(getByText('Save Game')).toBeDisabled();
     expect(getByText('Reset')).toBeEnabled();
+    expect(board).toEqual({
+        boardSize: 3,
+        boardName: "",
+        usersCells: [
+            { col: 1 , row: 0 },
+            { col: 0 , row: 1 },
+            { col: 0 , row: 2 },
+            { col: 1 , row: 2 }
+        ],
+        computersCells: [
+            { col: 0 , row: 0 },
+            { col: 2 , row: 0 },
+            { col: 1 , row: 1 },
+            { col: 2 , row: 1 },
+            { col: 2 , row: 2 }
+        ]
+    });
+    expect(game).toEqual({
+        message: "O won the game!",
+        isOver: true,
+        started: true
+    });
 });
 
 it("shows proper message on draw and disables save", () => {
@@ -224,6 +278,28 @@ it("shows proper message on draw and disables save", () => {
     expect(queryByText('Draw!')).not.toBeNull();
     expect(getByText('Save Game')).toBeDisabled();
     expect(getByText('Reset')).toBeEnabled();
+    expect(board).toEqual({
+        boardSize: 3,
+        boardName: "",
+        usersCells: [
+            { col: 2 , row: 0 },
+            { col: 0 , row: 1 },
+            { col: 1 , row: 1 },
+            { col: 1 , row: 2 },
+            { col: 2 , row: 2 }
+        ],
+        computersCells: [
+            { col: 0 , row: 0 },
+            { col: 1 , row: 0 },
+            { col: 2 , row: 1 },
+            { col: 0 , row: 2 }
+        ]
+    });
+    expect(game).toEqual({
+        message: "Draw!",
+        isOver: true,
+        started: true
+    });
 });
 
 it("resets properly and disables save and reset", () => {
@@ -268,6 +344,17 @@ it("resets properly and disables save and reset", () => {
     });
     expect(getByText('Save Game')).toBeDisabled();
     expect(getByText('Reset')).toBeDisabled();
+    expect(board).toEqual({
+        boardSize: 3,
+        boardName: "",
+        usersCells: [],
+        computersCells: []
+    });
+    expect(game).toEqual({
+        message: "",
+        isOver: false,
+        started: false
+    });
 });
 
 it('if given edit handler, properly edits values', () => {
@@ -311,4 +398,14 @@ it('if given edit handler, properly edits values', () => {
     expect(getByTestId('tile-00')).toBeEmpty();
     expect(getByTestId('tile-01')).toHaveTextContent(COMPUTER_SYMBOL);
     expect(getByTestId('tile-11')).toHaveTextContent(USER_SYMBOL);
+    expect(board).toEqual({
+        boardSize: 3,
+        boardName: "",
+        usersCells: [
+            { col: 1, row: 1 }
+        ],
+        computersCells: [
+            { col: 1, row: 0 }
+        ]
+    });
 });
