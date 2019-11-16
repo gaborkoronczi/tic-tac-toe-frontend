@@ -4,8 +4,8 @@ import { Segment, Button, Message } from 'semantic-ui-react';
 
 import SaveModal from './SaveModal/SaveModal';
 import { GameContext } from '../../contexts';
-import { translateBoard, initialBoard } from '../../utils/utils'
-import { USER_SYMBOL, COMPUTER_SYMBOL } from '../../utils/const';
+import { translateBoard } from '../../utils/utils'
+import { USER_SYMBOL, COMPUTER_SYMBOL, WINNING_LENGTH } from '../../utils/const';
 import Tile from './Tile/Tile';
 import './Board.css'
 
@@ -27,7 +27,7 @@ function Board (props) {
 
     const handleReset = () => {
         setGame({ message: "", isOver: false, started: false});
-        setBoard(initialBoard);
+        setBoard({...workingBoard, usersCells: [], computersCells: []});
     }
 
     const handleClick = (row, col) => {
@@ -54,76 +54,110 @@ function Board (props) {
     }
 
     const makeTurn = (row, col) => {
-        if (!findUsersCell(row, col) && !findComputersCell(row, col) && !game.isOver) {
-            let usersCell = {row, col};
-            let computersCell = {};
-            let computerCellFound = false;
-            const boardData = translateBoard(workingBoard);
-            boardData[row][col] = USER_SYMBOL;
-            for (let i = 0; i < workingBoard.boardSize && !computerCellFound; i++) {
-                for (let j = 0; j < workingBoard.boardSize && !computerCellFound; j++) {
-                    if (!boardData[i][j] ) {
-                        computersCell = { row: i, col: j };
-                        computerCellFound = true;
-                    }
-                }
-            }
-            if (computerCellFound) {
+        const boardData = translateBoard(workingBoard);
+        if(isCellEmpty(boardData, row, col)) {
+            move(boardData, {row, col, symbol: USER_SYMBOL});
+            if(checkForWinner(boardData, {row, col, symbol: USER_SYMBOL})) {
+                setBoard({...workingBoard,
+                    usersCells: workingBoard.usersCells.concat({row, col})
+                });
+                setGame({...game, message: `${USER_SYMBOL} won the game!`, isOver: true});
+            } else if (!isBoardFull(boardData)) {
+                let computerRow, computerCol;
+                do {
+                    computerRow = getRandomInteger(0, workingBoard.boardSize);
+                    computerCol = getRandomInteger(0, workingBoard.boardSize);
+                } while (!isCellEmpty(boardData, computerRow, computerCol));
+                move(boardData, {row: computerRow, col: computerCol, symbol: COMPUTER_SYMBOL});
                 setBoard({
                     ...workingBoard,
-                    usersCells: workingBoard.usersCells.concat(usersCell),
-                    computersCells: workingBoard.computersCells.concat(computersCell)
+                    usersCells: workingBoard.usersCells.concat({row, col}),
+                    computersCells: workingBoard.computersCells.concat({row: computerRow, col: computerCol})
                 });
+                if (checkForWinner(boardData, {row: computerRow, col: computerCol, symbol: COMPUTER_SYMBOL})) {
+                    setGame({...game, message: `${COMPUTER_SYMBOL} won the game!`, isOver: true});
+                }
             } else {
                 setBoard({...workingBoard,
-                    usersCells: workingBoard.usersCells.concat(usersCell)
+                    usersCells: workingBoard.usersCells.concat({row, col})
                 });
                 setGame({...game, message: "Draw!", isOver: true});
             }
-            checkForWinner(usersCell, computersCell);
         }
+    };
+
+    const move = (board, move) => {
+        const { row, col, symbol } = move;
+        board[row][col] = symbol;
     }
-    
-    const findUsersCell = (row, col) => {
-        return workingBoard.usersCells.find(i => {
-            return i.row === row && i.col === col
+
+    const isCellEmpty = (board, row, col) => {
+        return board[row][col] === null ? true : false
+    }
+
+    const isBoardFull = (board) => {
+        return board.every((row) => {
+            return row.every((col) => col !== null);
         });
     }
-    
-    const findComputersCell = (row, col) => {
-        return workingBoard.computersCells.find(i => {
-            return i.row === row && i.col === col
-        });
+
+    const getRandomInteger = (min, max) => {
+        return Math.floor(Math.random() * (max - min) ) + min;
     }
-    
-    const checkForWinner = (usersCell, computersCell) => {
-        const boardData = translateBoard(workingBoard);
-        boardData[usersCell.row][usersCell.col] = USER_SYMBOL;
-        if (Object.keys(computersCell).length > 0) {
-            boardData[computersCell.row][computersCell.col] = COMPUTER_SYMBOL;
-        }
+
+    const checkForWinner = (board, lastMove) => {
+        const boardSize = board.length;
+        const { row, col, symbol } = lastMove;
         
-        const winningCondition = [
-            [{ r: 0, c: 0 }, { r: 0, c: 1}, { r: 0, c: 2}],
-            [{ r: 1, c: 0 }, { r: 1, c: 1}, { r: 1, c: 2}],
-            [{ r: 2, c: 0 }, { r: 2, c: 1}, { r: 2, c: 2}],
-            [{ r: 0, c: 0 }, { r: 1, c: 0}, { r: 2, c: 0}],
-            [{ r: 0, c: 1 }, { r: 1, c: 1}, { r: 2, c: 1}],
-            [{ r: 0, c: 2 }, { r: 1, c: 2}, { r: 2, c: 2}],
-            [{ r: 0, c: 0 }, { r: 1, c: 1}, { r: 2, c: 2}],
-            [{ r: 2, c: 0 }, { r: 1, c: 1}, { r: 0, c: 2}],
-        ];
-    
-        for (let i = 0; i < winningCondition.length; i++) {
-            const [a, b, c] = winningCondition[i];
-            if (
-                boardData[a.r][a.c] &&
-                boardData[a.r][a.c] === boardData[b.r][b.c] &&
-                boardData[a.r][a.c] === boardData[c.r][c.c]
-            ) {
-                setGame({...game, message: `${boardData[a.r][a.c]} won the game!`, isOver: true});
+        for (let i = 0; i < WINNING_LENGTH; i++) {
+            const colArray = [];
+            const rowArray = [];
+            const diagonalArray = [];
+            const antiDiagonalArray = [];
+
+            for (let j = 0; j < WINNING_LENGTH; j++) {
+                let currentCol = col-i+j;
+                if (currentCol >= 0 && currentCol < boardSize) {
+                    colArray.push(board[row][currentCol]);  
+                }
+                if (colArray.every((val) => val === symbol) && colArray.length === WINNING_LENGTH) {
+                    return symbol;
+                };
+
+                let currentRow = row-i+j;
+                if (currentRow >= 0 && currentRow < boardSize) {
+                    rowArray.push(board[currentRow][col]);
+                }
+                if (rowArray.every((val) => val === symbol) && rowArray.length === WINNING_LENGTH) {
+                    return symbol;
+                };
+
+                if (
+                    currentRow >= 0 &&
+                    currentCol >= 0 &&
+                    currentRow < boardSize &&
+                    currentCol < boardSize
+                ) {
+                  diagonalArray.push(board[currentRow][currentCol]); 
+                }
+                if (diagonalArray.every((val) => val === symbol) && diagonalArray.length === WINNING_LENGTH) {
+                    return symbol;
+                };
+
+                let currentAntiDiagonalCol = col-i-j;
+                if (currentRow >= 0 &&
+                    currentAntiDiagonalCol >= 0 &&
+                    currentRow < boardSize &&
+                    currentAntiDiagonalCol < boardSize
+                ) {
+                    antiDiagonalArray.push(board[currentRow][currentAntiDiagonalCol]);
+                };
+                if (antiDiagonalArray.every((val) => val === symbol) && antiDiagonalArray.length === WINNING_LENGTH) {
+                    return symbol;
+                };
             }
         }
+        return false;
     }
 
     const renderBoard = () => {
@@ -149,7 +183,18 @@ function Board (props) {
                 );
             }
         }
-        return <div className="board">{boardToBeRendered}</div>;
+        return (
+            <div
+                className="board"
+                style={{
+                    gridTemplateColumns: `repeat(${workingBoard.boardSize}, 1fr)`,
+                    gridTemplateRows: `repeat(${workingBoard.boardSize}, 1fr)`,
+                    fontSize: `${20/workingBoard.boardSize}rem`
+                }}
+            >
+                {boardToBeRendered}
+            </div>
+        );
     }
 
     const renderPlayableBoard = () => {
